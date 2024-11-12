@@ -1,0 +1,8 @@
+.DS_Store
+
+# Test Sound Data
+*.webm
+*.wav
+
+# Output Data
+*.txt
