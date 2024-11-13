@@ -1,15 +1,19 @@
 import whisper
 import sys
-import os
+import warnings
 
-# smallモデルを読み込み
-model = whisper.load_model("small")
+# Warningを出力させたいならコメントアウトする
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+
+# turboモデルを読み込み（キャッシュ済み）
+model = whisper.load_model("turbo")
 
 # 音声ファイルのパス
 audio_path = sys.argv[1]
 
 # Whisperのテキスト変換の実行
-result = model.transcribe(audio_path, temperature=0.5, language="ja", verbose=True)
+result = model.transcribe(audio_path, temperature=0.5, language="ja")
 
 # 出力をファイルに保存
 output_text = "\n".join([segment['text'] for segment in result['segments']])

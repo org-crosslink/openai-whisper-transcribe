@@ -10,6 +10,9 @@ RUN apt-get update && \
 RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir git+https://github.com/openai/whisper.git
 
+# turboモデルをキャッシュに保存
+RUN python -c "import whisper; whisper.load_model('turbo')"
+
 # 作業ディレクトリの設定
 WORKDIR /app
 
