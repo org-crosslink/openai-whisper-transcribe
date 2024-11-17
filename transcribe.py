@@ -21,19 +21,32 @@ result = model.transcribe(audio_path, temperature=0.5, language="ja", verbose=Fa
 
 # 出力をファイルに保存
 output_lines = []
-for segment in result['segments']:
-    if add_timestamp:
-        # 各セグメントの開始時間を mm:ss 形式に変換
-        minutes = int(segment['start'] // 60)
-        seconds = int(segment['start'] % 60)
-        timestamp = f"{minutes:02}:{seconds:02}"
-        output_lines.append(f"{timestamp} {segment['text']}")
-    else:
-        # 時間情報を追加しない場合
-        output_lines.append(segment['text'])
+for i, segment in enumerate(result['segments']):
+    # セグメントの開始時間と終了時間を取得
+    start_time = segment['start']
+    end_time = segment['end']
 
-# すべての行を一つのテキストに結合してファイルに保存
-output_text = "\n".join(output_lines)
+    # タイムスタンプ形式の変換
+    def format_timestamp(seconds):
+        minutes = int(seconds // 60)
+        seconds = int(seconds % 60)
+        return f"{minutes:02}:{seconds:02}"
+
+    # 空白時間を挿入
+    if i > 0:
+        previous_end = result['segments'][i - 1]['end']
+        # 1秒以上の空白がある場合は無音時間として記録
+        if start_time - previous_end > 1.0:  
+            output_lines.append(f"{format_timestamp(previous_end)} - {format_timestamp(start_time)}: [無音時間]")
+
+    # セグメント内容を追加
+    output_lines.append(f"{format_timestamp(start_time)} - {format_timestamp(end_time)}: {segment['text']}")
+
+# 無音時間の行を除外
+filtered_lines = [line for line in output_lines if "[無音時間]" not in line]
+
+# ファイル保存
+output_text = "\n".join(filtered_lines)
 output_file = "transcription.txt"
 with open(output_file, "w", encoding="utf-8") as f:
     f.write(output_text)
