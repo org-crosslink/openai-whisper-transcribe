@@ -1,17 +1,24 @@
 import whisper
 import sys
 import warnings
+import os
 
 # Warningを出力させたいならコメントアウトする
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
+# デフォルトの作業ディレクトリ（Dockerのマウントポイントと一致）
+DEFAULT_WORKDIR = "/app"
+
 # コマンドライン引数の処理
 args = sys.argv[1:]
 
-# -t オプションが指定されたか確認し、文字起こし対象ファイルのパスを取得する
-add_timestamp = "-t" in args
+# 文字起こし対象ファイルのパスを取得する
 audio_path = next(arg for arg in args if not arg.startswith("-"))
+
+# 入力ファイルを絶対パスに変換（相対パスの場合、自動的に/appを補完）
+if not os.path.isabs(audio_path):
+    audio_path = os.path.join(DEFAULT_WORKDIR, audio_path)
 
 # turboモデルを読み込み（キャッシュ済み）
 model = whisper.load_model("turbo")
